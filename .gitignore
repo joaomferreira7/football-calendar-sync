@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Credenciais — NUNCA commitar estes ficheiros!
+credentials.json
+service_account.json
+token.json
+*.key
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
