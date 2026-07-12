@@ -1,11 +1,15 @@
 """
 football-calendar-sync
-Sincroniza jogos de futebol (Primeira Liga, Segunda Liga, Champions)
+Sincroniza os jogos do Sporting CP (Primeira Liga e Champions League)
 com o Google Calendar, detetando novos jogos e alterações de horário.
+
+Fonte de dados: football-data.org (plano gratuito).
 """
 
 import os
+import sys
 import json
+import time
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -13,6 +17,12 @@ import requests
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+# Os logs usam emojis; a codepage por omissão do terminal do Windows (cp1252)
+# não os consegue codificar e o script rebenta com UnicodeEncodeError.
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -28,31 +38,29 @@ log = logging.getLogger(__name__)
 # Configuração — edita aqui as tuas preferências
 # ---------------------------------------------------------------------------
 
-# IDs das ligas na API-Football
-LEAGUES = {
-    94: "Primeira Liga 🇵🇹",
-    95: "Segunda Liga 🇵🇹",
-    2:  "Champions League 🏆",
+# Códigos das competições na football-data.org
+COMPETITIONS = {
+    "PPL": "Primeira Liga 🇵🇹",
+    "CL": "Champions League 🏆",
 }
 
-# Equipa específica a seguir (None = todas as equipas das ligas acima)
-# Exemplos: 212 = FC Porto, 228 = Benfica, 229 = Sporting CP
-TEAM_ID = None  # Substitui pelo ID da tua equipa se quiseres filtrar
+# Clube a seguir — comparado (case-insensitive) contra o nome, nome curto
+# e sigla (tla) de cada equipa. Deixa em "" para não filtrar por clube.
+TEAM_NAME = "Sporting CP"
 
 # Janela de dias à frente a ir buscar jogos
 DAYS_AHEAD = 45
 
-# Temporada atual
-SEASON = 2025
-
-# Cores dos eventos no Google Calendar por liga (1–11)
+# Cores dos eventos no Google Calendar por competição (1–11)
 # 1 lavanda, 2 sálvia, 3 uva, 4 flamingo, 5 banana, 6 tangerina,
 # 7 pavão, 8 mirtilos, 9 mirtilo escuro, 10 basil, 11 tomate
-LEAGUE_COLORS = {
-    94: "10",  # verde  — Primeira Liga
-    95: "6",   # laranja — Segunda Liga
-    2:  "3",   # uva    — Champions
+COMPETITION_COLORS = {
+    "PPL": "10",  # verde  — Primeira Liga
+    "CL": "3",    # uva    — Champions League
 }
+
+# Estados de jogo a ignorar (já aconteceram ou não vão realizar-se como previsto)
+IGNORED_STATUSES = {"FINISHED", "IN_PLAY", "PAUSED", "CANCELLED"}
 
 # Duração estimada de um jogo (minutos)
 MATCH_DURATION_MINUTES = 110  # 90 + intervalo
@@ -91,61 +99,78 @@ def get_calendar_service():
 
 
 # ---------------------------------------------------------------------------
-# API-Football
+# football-data.org
 # ---------------------------------------------------------------------------
 
-API_BASE = "https://v3.football.api-sports.io"
+API_BASE = "https://api.football-data.org/v4"
 
 
 def _api_headers():
-    key = os.environ.get("API_FOOTBALL_KEY")
-    if not key:
-        raise EnvironmentError("Variável de ambiente API_FOOTBALL_KEY não definida.")
-    return {"x-apisports-key": key}
+    token = os.environ.get("FOOTBALL_DATA_TOKEN")
+    if not token:
+        raise EnvironmentError("Variável de ambiente FOOTBALL_DATA_TOKEN não definida.")
+    return {"X-Auth-Token": token}
 
 
-def fetch_fixtures_for_league(league_id: int) -> list:
-    """Vai buscar os próximos jogos de uma liga na janela configurada."""
+def _api_get(url: str, params: dict):
+    """GET à football-data.org que respeita os headers de rate limit.
+
+    A API expõe X-Requests-Available-Minute (pedidos que ainda restam
+    na janela atual) e, num 429, Retry-After. Como só fazemos ~1 pedido
+    por execução isto raramente entra em ação, mas protege execuções
+    manuais/testes repetidos de seguida contra o rate limiter.
+    """
+    resp = requests.get(url, headers=_api_headers(), params=params, timeout=15)
+
+    remaining = resp.headers.get("X-Requests-Available-Minute")
+    if remaining is not None:
+        log.info("Pedidos disponíveis neste minuto (football-data.org): %s", remaining)
+
+    if resp.status_code == 429:
+        retry_after = int(resp.headers.get("Retry-After", 60))
+        log.warning("Rate limit atingido (429). A aguardar %ds antes de repetir...", retry_after)
+        time.sleep(retry_after)
+        resp = requests.get(url, headers=_api_headers(), params=params, timeout=15)
+
+    resp.raise_for_status()
+    return resp
+
+
+def is_target_team(match: dict) -> bool:
+    """Verifica se o TEAM_NAME configurado joga neste encontro."""
+    if not TEAM_NAME:
+        return True
+    needle = TEAM_NAME.lower()
+    for side in ("homeTeam", "awayTeam"):
+        team = match.get(side) or {}
+        candidates = (team.get("name"), team.get("shortName"), team.get("tla"))
+        if any(candidate and needle in candidate.lower() for candidate in candidates):
+            return True
+    return False
+
+
+def fetch_all_matches() -> list:
+    """Vai buscar, numa única chamada, os próximos jogos das competições
+    configuradas, e filtra-os localmente pelo TEAM_NAME."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     future = (datetime.now(timezone.utc) + timedelta(days=DAYS_AHEAD)).strftime("%Y-%m-%d")
 
     params = {
-        "league": league_id,
-        "season": SEASON,
-        "from": today,
-        "to": future,
+        "competitions": ",".join(COMPETITIONS),
+        "dateFrom": today,
+        "dateTo": future,
     }
-    if TEAM_ID:
-        params["team"] = TEAM_ID
 
-    resp = requests.get(
-        f"{API_BASE}/fixtures",
-        headers=_api_headers(),
-        params=params,
-        timeout=15,
-    )
-    resp.raise_for_status()
+    resp = _api_get(f"{API_BASE}/matches", params=params)
     data = resp.json()
 
-    errors = data.get("errors", {})
-    if errors:
-        raise RuntimeError(f"Erro da API-Football: {errors}")
-
-    fixtures = data.get("response", [])
-    log.info("Liga %s (%s): %d jogos encontrados", league_id, LEAGUES[league_id], len(fixtures))
-    return fixtures
-
-
-def fetch_all_fixtures() -> list:
-    """Agrega os jogos de todas as ligas configuradas."""
-    all_fixtures = []
-    for league_id in LEAGUES:
-        try:
-            fixtures = fetch_fixtures_for_league(league_id)
-            all_fixtures.extend(fixtures)
-        except Exception as e:
-            log.error("Erro ao ir buscar liga %s: %s", league_id, e)
-    return all_fixtures
+    matches = data.get("matches", [])
+    filtered = [m for m in matches if is_target_team(m)]
+    log.info(
+        "Jogos encontrados: %d no total, %d do %s",
+        len(matches), len(filtered), TEAM_NAME or "todos",
+    )
+    return filtered
 
 
 # ---------------------------------------------------------------------------
@@ -187,34 +212,31 @@ def friendly_date(iso_date: str) -> str:
 # Google Calendar — operações
 # ---------------------------------------------------------------------------
 
-def build_event_body(fixture: dict) -> dict:
+def build_event_body(match: dict) -> dict:
     """Constrói o corpo do evento para a Google Calendar API."""
-    home = fixture["teams"]["home"]["name"]
-    away = fixture["teams"]["away"]["name"]
-    league_id = fixture["league"]["id"]
-    league_name = fixture["league"]["name"]
-    round_name = fixture["league"]["round"]
-    venue = fixture["fixture"]["venue"].get("name") or ""
-    city = fixture["fixture"]["venue"].get("city") or ""
-    start_dt = fixture["fixture"]["date"]
+    home = match["homeTeam"]["name"]
+    away = match["awayTeam"]["name"]
+    competition_code = match["competition"]["code"]
+    competition_name = match["competition"]["name"]
+    matchday = match.get("matchday")
+    stage = match.get("stage")
+    venue = match.get("venue") or ""
+    start_dt = match["utcDate"]
 
-    location = f"{venue}, {city}".strip(", ") if venue else city
+    round_label = f"Jornada {matchday}" if matchday else (stage or "")
 
-    description_lines = [
-        f"🏆 {league_name}",
-        f"🗓️ {round_name}",
-    ]
+    description_lines = [f"🏆 {competition_name}"]
+    if round_label:
+        description_lines.append(f"🗓️ {round_label}")
     if venue:
         description_lines.append(f"🏟️ {venue}")
-    if city:
-        description_lines.append(f"📍 {city}")
     description_lines.append("")
     description_lines.append("Sincronizado automaticamente por football-calendar-sync")
 
     return {
         "summary": f"⚽ {home} vs {away}",
         "description": "\n".join(description_lines),
-        "location": location,
+        "location": venue,
         "start": {
             "dateTime": start_dt,
             "timeZone": "Europe/Lisbon",
@@ -223,7 +245,7 @@ def build_event_body(fixture: dict) -> dict:
             "dateTime": add_duration(start_dt),
             "timeZone": "Europe/Lisbon",
         },
-        "colorId": LEAGUE_COLORS.get(league_id, "1"),
+        "colorId": COMPETITION_COLORS.get(competition_code, "1"),
         "reminders": {
             "useDefault": False,
             "overrides": [
@@ -233,39 +255,39 @@ def build_event_body(fixture: dict) -> dict:
     }
 
 
-def create_calendar_event(service, fixture: dict) -> str:
+def create_calendar_event(service, match: dict) -> str:
     """Cria um evento no Google Calendar e devolve o event_id."""
-    body = build_event_body(fixture)
+    body = build_event_body(match)
     event = service.events().insert(calendarId=CALENDAR_ID, body=body).execute()
     event_id = event["id"]
     log.info(
         "✅ CRIADO  [%s] %s — %s",
-        friendly_date(fixture["fixture"]["date"]),
+        friendly_date(match["utcDate"]),
         event["summary"],
         event_id,
     )
     return event_id
 
 
-def update_calendar_event(service, event_id: str, fixture: dict):
+def update_calendar_event(service, event_id: str, match: dict):
     """Atualiza um evento existente com a nova data/hora."""
-    body = build_event_body(fixture)
+    body = build_event_body(match)
     service.events().update(
         calendarId=CALENDAR_ID, eventId=event_id, body=body
     ).execute()
     log.info(
         "🔄 ATUALIZADO [%s] %s — %s",
-        friendly_date(fixture["fixture"]["date"]),
+        friendly_date(match["utcDate"]),
         body["summary"],
         event_id,
     )
 
 
-def delete_calendar_event(service, event_id: str, fixture_id: str):
+def delete_calendar_event(service, event_id: str, match_id: str):
     """Remove um evento do Google Calendar."""
     try:
         service.events().delete(calendarId=CALENDAR_ID, eventId=event_id).execute()
-        log.info("🗑️  REMOVIDO  fixture_id=%s event_id=%s", fixture_id, event_id)
+        log.info("🗑️  REMOVIDO  match_id=%s event_id=%s", match_id, event_id)
     except HttpError as e:
         if e.resp.status == 410:
             log.warning("Evento %s já não existe no calendário (410 Gone)", event_id)
@@ -277,7 +299,7 @@ def delete_calendar_event(service, event_id: str, fixture_id: str):
 # Lógica de sincronização principal
 # ---------------------------------------------------------------------------
 
-def sync(fixtures: list, state: dict, service) -> dict:
+def sync(matches: list, state: dict, service) -> dict:
     """
     Compara os jogos da API com o estado guardado e sincroniza o Google Calendar.
 
@@ -286,62 +308,70 @@ def sync(fixtures: list, state: dict, service) -> dict:
     - Horário alterado           → atualiza evento
     - Jogo cancelado/desapareceu → remove evento + limpa estado
     """
-    api_fixture_ids = set()
+    api_match_ids = set()
     created = updated = deleted = skipped = 0
 
-    for fixture in fixtures:
-        fid = str(fixture["fixture"]["id"])
-        api_fixture_ids.add(fid)
-        new_date = fixture["fixture"]["date"]
-        status = fixture["fixture"]["status"]["short"]
+    for match in matches:
+        mid = str(match["id"])
+        api_match_ids.add(mid)
+        new_date = match["utcDate"]
+        status = match["status"]
 
-        # Ignorar jogos já terminados ou em curso
-        if status in ("FT", "AET", "PEN", "LIVE", "HT", "1H", "2H", "ET", "BT", "P"):
+        # Ignorar jogos já terminados, a decorrer ou cancelados
+        if status in IGNORED_STATUSES:
             skipped += 1
             continue
 
-        if fid not in state:
+        if mid not in state:
             # Jogo novo — criar evento
             try:
-                event_id = create_calendar_event(service, fixture)
-                state[fid] = {
+                event_id = create_calendar_event(service, match)
+                state[mid] = {
                     "date": new_date,
                     "event_id": event_id,
-                    "home": fixture["teams"]["home"]["name"],
-                    "away": fixture["teams"]["away"]["name"],
-                    "league": fixture["league"]["id"],
+                    "home": match["homeTeam"]["name"],
+                    "away": match["awayTeam"]["name"],
+                    "competition": match["competition"]["code"],
                 }
                 created += 1
-            except HttpError as e:
-                log.error("Erro ao criar evento para fixture %s: %s", fid, e)
+            except Exception as e:
+                log.error("Erro ao criar evento para jogo %s: %s", mid, e)
 
-        elif state[fid]["date"] != new_date:
+        elif state[mid]["date"] != new_date:
             # Horário alterado — atualizar evento
             try:
-                update_calendar_event(service, state[fid]["event_id"], fixture)
-                state[fid]["date"] = new_date
+                update_calendar_event(service, state[mid]["event_id"], match)
+                state[mid]["date"] = new_date
                 updated += 1
             except HttpError as e:
                 if e.resp.status == 404:
                     log.warning("Evento não encontrado no Calendar, a recriar...")
-                    event_id = create_calendar_event(service, fixture)
-                    state[fid]["event_id"] = event_id
-                    state[fid]["date"] = new_date
-                    created += 1
+                    try:
+                        event_id = create_calendar_event(service, match)
+                        state[mid]["event_id"] = event_id
+                        state[mid]["date"] = new_date
+                        created += 1
+                    except Exception as e2:
+                        log.error("Erro ao recriar evento para jogo %s: %s", mid, e2)
                 else:
-                    log.error("Erro ao atualizar evento para fixture %s: %s", fid, e)
+                    log.error("Erro ao atualizar evento para jogo %s: %s", mid, e)
+            except Exception as e:
+                log.error("Erro ao atualizar evento para jogo %s: %s", mid, e)
         else:
             skipped += 1
 
     # Jogos que desapareceram da API (cancelados ou adiados indefinidamente)
-    for fid in list(state.keys()):
-        if fid not in api_fixture_ids:
+    for mid in list(state.keys()):
+        if mid not in api_match_ids:
             try:
-                delete_calendar_event(service, state[fid]["event_id"], fid)
+                delete_calendar_event(service, state[mid]["event_id"], mid)
                 deleted += 1
-            except HttpError as e:
-                log.error("Erro ao remover evento para fixture %s: %s", fid, e)
-            del state[fid]
+                del state[mid]
+            except Exception as e:
+                # Não apaga do state em caso de falha — assim a próxima
+                # execução tenta remover o evento outra vez, em vez de
+                # ficar órfão no calendário para sempre.
+                log.error("Erro ao remover evento para jogo %s: %s", mid, e)
 
     log.info(
         "Sincronização concluída — ✅ criados: %d | 🔄 atualizados: %d | 🗑️  removidos: %d | ⏭️  ignorados: %d",
@@ -366,20 +396,24 @@ def main():
     log.info("Estado carregado: %d jogos em memória", len(state))
 
     # 3. Ir buscar jogos à API
-    log.info("A ir buscar jogos à API-Football...")
-    fixtures = fetch_all_fixtures()
-    log.info("Total de jogos obtidos: %d", len(fixtures))
+    log.info("A ir buscar jogos à football-data.org...")
+    matches = fetch_all_matches()
+    log.info("Total de jogos do %s obtidos: %d", TEAM_NAME or "filtro", len(matches))
 
-    if not fixtures:
+    if not matches:
         log.warning("Nenhum jogo encontrado. A terminar sem alterações.")
         return
 
     # 4. Sincronizar
+    # `state` é atualizado in-place por sync(), por isso guardamo-lo sempre
+    # no finally — mesmo que uma exceção interrompa o processo a meio,
+    # não perdemos o registo dos eventos já criados/atualizados/removidos
+    # (o que evitaria duplicados na próxima execução).
     log.info("A sincronizar com o Google Calendar...")
-    updated_state = sync(fixtures, state, service)
-
-    # 5. Guardar estado atualizado
-    save_state(updated_state)
+    try:
+        sync(matches, state, service)
+    finally:
+        save_state(state)
 
     log.info("=== Concluído ===")
 

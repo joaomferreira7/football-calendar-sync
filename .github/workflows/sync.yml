@@ -9,6 +9,12 @@ on:
   # Permite correr manualmente no separador Actions do GitHub
   workflow_dispatch:
 
+# Evita execuções sobrepostas (ex: run manual a meio de um run agendado),
+# que poderiam entrar em conflito ao fazer commit do fixtures_state.json.
+concurrency:
+  group: football-calendar-sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -36,7 +42,7 @@ jobs:
 
       - name: Correr sincronização
         env:
-          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: python sync.py
 
