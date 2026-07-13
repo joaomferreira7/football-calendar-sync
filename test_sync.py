@@ -3,7 +3,7 @@ Testes para a lógica de sincronização em sync.py.
 
 Não tocam em nenhuma API real: o serviço da Google Calendar é um MagicMock
 e os "jogos" são dicionários construídos à mão com a forma que a
-football-data.org devolve (endpoint /v4/competitions/{code}/matches).
+football-data.org devolve (endpoint /v4/teams/{id}/matches).
 """
 
 from types import SimpleNamespace
@@ -15,7 +15,7 @@ import sync
 
 
 def make_match(match_id, date, status="SCHEDULED", home="Sporting CP", away="SL Benfica",
-                competition_code="PPL", competition_name="Primeira Liga", matchday=1):
+                competition_id=2017, competition_name="Primeira Liga", matchday=1):
     return {
         "id": match_id,
         "utcDate": date,
@@ -25,7 +25,7 @@ def make_match(match_id, date, status="SCHEDULED", home="Sporting CP", away="SL 
         "venue": "Estádio José Alvalade",
         "homeTeam": {"name": home, "shortName": home, "tla": "SCP" if home == "Sporting CP" else "XXX"},
         "awayTeam": {"name": away, "shortName": away, "tla": "SLB" if away == "SL Benfica" else "XXX"},
-        "competition": {"code": competition_code, "name": competition_name},
+        "competition": {"id": competition_id, "name": competition_name},
     }
 
 
@@ -64,7 +64,7 @@ def test_skips_match_already_in_state_with_same_date():
     service = make_service()
     matches = [make_match("m1", "2026-03-22T21:15:00Z")]
     state = {"m1": {"date": "2026-03-22T21:15:00Z", "event_id": "evt_old",
-                     "home": "Sporting CP", "away": "SL Benfica", "competition": "PPL"}}
+                     "home": "Sporting CP", "away": "SL Benfica", "competition": 2017}}
 
     sync.sync(matches, state, service)
 
@@ -76,7 +76,7 @@ def test_updates_event_when_date_changes():
     service = make_service()
     matches = [make_match("m1", "2026-03-23T18:00:00Z")]
     state = {"m1": {"date": "2026-03-22T21:15:00Z", "event_id": "evt_old",
-                     "home": "Sporting CP", "away": "SL Benfica", "competition": "PPL"}}
+                     "home": "Sporting CP", "away": "SL Benfica", "competition": 2017}}
 
     sync.sync(matches, state, service)
 
@@ -91,7 +91,7 @@ def test_recreates_event_when_update_target_is_gone():
     service.events.return_value.update.return_value.execute.side_effect = http_error(404)
     matches = [make_match("m1", "2026-03-23T18:00:00Z")]
     state = {"m1": {"date": "2026-03-22T21:15:00Z", "event_id": "evt_deleted",
-                     "home": "Sporting CP", "away": "SL Benfica", "competition": "PPL"}}
+                     "home": "Sporting CP", "away": "SL Benfica", "competition": 2017}}
 
     sync.sync(matches, state, service)
 
@@ -103,7 +103,7 @@ def test_recreates_event_when_update_target_is_gone():
 def test_deletes_event_for_match_no_longer_in_api():
     service = make_service()
     state = {"m1": {"date": "2026-03-22T21:15:00Z", "event_id": "evt_old",
-                     "home": "Sporting CP", "away": "SL Benfica", "competition": "PPL"}}
+                     "home": "Sporting CP", "away": "SL Benfica", "competition": 2017}}
 
     sync.sync([], state, service)
 
@@ -115,7 +115,7 @@ def test_keeps_match_in_state_when_delete_fails():
     service = make_service()
     service.events.return_value.delete.return_value.execute.side_effect = RuntimeError("network blip")
     state = {"m1": {"date": "2026-03-22T21:15:00Z", "event_id": "evt_old",
-                     "home": "Sporting CP", "away": "SL Benfica", "competition": "PPL"}}
+                     "home": "Sporting CP", "away": "SL Benfica", "competition": 2017}}
 
     sync.sync([], state, service)
 
@@ -153,20 +153,18 @@ def test_creation_failure_does_not_crash_the_whole_batch():
     assert state["fine"]["event_id"] == "evt_ok"
 
 
-def test_is_target_team_matches_home_or_away():
-    sporting_home = make_match("m1", "2026-03-22T21:15:00Z", home="Sporting CP", away="SL Benfica")
-    sporting_away = make_match("m2", "2026-03-22T21:15:00Z", home="FC Porto", away="Sporting CP")
-    neither = make_match("m3", "2026-03-22T21:15:00Z", home="FC Porto", away="SL Benfica")
-
-    assert sync.is_target_team(sporting_home) is True
-    assert sync.is_target_team(sporting_away) is True
-    assert sync.is_target_team(neither) is False
-
-
 def test_build_event_body_uses_competition_color_and_summary():
-    match = make_match("m1", "2026-03-22T21:15:00Z", competition_code="CL", competition_name="Champions League")
+    match = make_match("m1", "2026-03-22T21:15:00Z", competition_id=2001, competition_name="Champions League")
 
     body = sync.build_event_body(match)
 
     assert body["summary"] == "⚽ Sporting CP vs SL Benfica"
-    assert body["colorId"] == sync.COMPETITION_COLORS["CL"]
+    assert body["colorId"] == sync.COMPETITION_COLORS[2001]
+
+
+def test_build_event_body_falls_back_to_default_color_for_unknown_competition():
+    match = make_match("m1", "2026-03-22T21:15:00Z", competition_id=9999, competition_name="Taça Misteriosa")
+
+    body = sync.build_event_body(match)
+
+    assert body["colorId"] == "1"

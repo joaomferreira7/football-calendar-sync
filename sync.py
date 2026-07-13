@@ -38,15 +38,22 @@ log = logging.getLogger(__name__)
 # Configuração — edita aqui as tuas preferências
 # ---------------------------------------------------------------------------
 
-# Códigos das competições na football-data.org
-COMPETITIONS = {
-    "PPL": "Primeira Liga 🇵🇹",
-    "CL": "Champions League 🏆",
-}
+# ID da equipa a seguir na football-data.org (endpoint /v4/teams/{id}/matches
+# já devolve só os jogos desta equipa, não é preciso filtrar mais nada).
+# Sporting CP = 498.
+#
+# Para testar com jogos que estejam mesmo a acontecer (ex: enquanto a
+# Primeira Liga ainda não começou), troca temporariamente por:
+#   TEAM_ID = 760                          # Seleção Espanhola
+#   COMPETITIONS = {2000: "FIFA World Cup 🌍"}
+TEAM_ID = 498
 
-# Clube a seguir — comparado (case-insensitive) contra o nome, nome curto
-# e sigla (tla) de cada equipa. Deixa em "" para não filtrar por clube.
-TEAM_NAME = "Sporting CP"
+# IDs numéricos das competições a incluir — a API exige o ID aqui, não o
+# código (ex: Primeira Liga é "PPL" como código mas 2017 como ID).
+COMPETITIONS = {
+    2017: "Primeira Liga 🇵🇹",
+    2001: "Champions League 🏆",
+}
 
 # Janela de dias à frente a ir buscar jogos
 DAYS_AHEAD = 45
@@ -55,8 +62,8 @@ DAYS_AHEAD = 45
 # 1 lavanda, 2 sálvia, 3 uva, 4 flamingo, 5 banana, 6 tangerina,
 # 7 pavão, 8 mirtilos, 9 mirtilo escuro, 10 basil, 11 tomate
 COMPETITION_COLORS = {
-    "PPL": "10",  # verde  — Primeira Liga
-    "CL": "3",    # uva    — Champions League
+    2017: "10",  # verde — Primeira Liga
+    2001: "3",   # uva   — Champions League
 }
 
 # Estados de jogo a ignorar (já aconteceram ou não vão realizar-se como previsto)
@@ -136,41 +143,24 @@ def _api_get(url: str, params: dict):
     return resp
 
 
-def is_target_team(match: dict) -> bool:
-    """Verifica se o TEAM_NAME configurado joga neste encontro."""
-    if not TEAM_NAME:
-        return True
-    needle = TEAM_NAME.lower()
-    for side in ("homeTeam", "awayTeam"):
-        team = match.get(side) or {}
-        candidates = (team.get("name"), team.get("shortName"), team.get("tla"))
-        if any(candidate and needle in candidate.lower() for candidate in candidates):
-            return True
-    return False
-
-
 def fetch_all_matches() -> list:
-    """Vai buscar, numa única chamada, os próximos jogos das competições
-    configuradas, e filtra-os localmente pelo TEAM_NAME."""
+    """Vai buscar, numa única chamada, os próximos jogos da equipa (TEAM_ID)
+    nas competições configuradas."""
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     future = (datetime.now(timezone.utc) + timedelta(days=DAYS_AHEAD)).strftime("%Y-%m-%d")
 
     params = {
-        "competitions": ",".join(COMPETITIONS),
+        "competitionIds": ",".join(str(c) for c in COMPETITIONS),
         "dateFrom": today,
         "dateTo": future,
     }
 
-    resp = _api_get(f"{API_BASE}/matches", params=params)
+    resp = _api_get(f"{API_BASE}/teams/{TEAM_ID}/matches", params=params)
     data = resp.json()
 
     matches = data.get("matches", [])
-    filtered = [m for m in matches if is_target_team(m)]
-    log.info(
-        "Jogos encontrados: %d no total, %d do %s",
-        len(matches), len(filtered), TEAM_NAME or "todos",
-    )
-    return filtered
+    log.info("Jogos encontrados para a equipa %s: %d", TEAM_ID, len(matches))
+    return matches
 
 
 # ---------------------------------------------------------------------------
@@ -216,7 +206,7 @@ def build_event_body(match: dict) -> dict:
     """Constrói o corpo do evento para a Google Calendar API."""
     home = match["homeTeam"]["name"]
     away = match["awayTeam"]["name"]
-    competition_code = match["competition"]["code"]
+    competition_id = match["competition"]["id"]
     competition_name = match["competition"]["name"]
     matchday = match.get("matchday")
     stage = match.get("stage")
@@ -245,7 +235,7 @@ def build_event_body(match: dict) -> dict:
             "dateTime": add_duration(start_dt),
             "timeZone": "Europe/Lisbon",
         },
-        "colorId": COMPETITION_COLORS.get(competition_code, "1"),
+        "colorId": COMPETITION_COLORS.get(competition_id, "1"),
         "reminders": {
             "useDefault": False,
             "overrides": [
@@ -331,7 +321,7 @@ def sync(matches: list, state: dict, service) -> dict:
                     "event_id": event_id,
                     "home": match["homeTeam"]["name"],
                     "away": match["awayTeam"]["name"],
-                    "competition": match["competition"]["code"],
+                    "competition": match["competition"]["id"],
                 }
                 created += 1
             except Exception as e:
@@ -398,7 +388,7 @@ def main():
     # 3. Ir buscar jogos à API
     log.info("A ir buscar jogos à football-data.org...")
     matches = fetch_all_matches()
-    log.info("Total de jogos do %s obtidos: %d", TEAM_NAME or "filtro", len(matches))
+    log.info("Total de jogos obtidos: %d", len(matches))
 
     if not matches:
         log.warning("Nenhum jogo encontrado. A terminar sem alterações.")

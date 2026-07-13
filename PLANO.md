@@ -9,7 +9,9 @@ Se o horário mudar, o evento é atualizado. Se o jogo for cancelado, o evento �
 **Competições cobertas (plano gratuito da football-data.org):**
 - Primeira Liga Portuguesa
 - Champions League
-- Filtrado apenas para os jogos do Sporting CP (`TEAM_NAME` em `sync.py`)
+
+Os jogos vêm diretamente do endpoint `/v4/teams/{id}/matches` da equipa (Sporting CP),
+por isso não é preciso filtrar nada localmente — tudo o que a API devolve já é do clube.
 
 ---
 
@@ -24,7 +26,7 @@ Se o horário mudar, o evento é atualizado. Se o jogo for cancelado, o evento �
 | Scheduler | GitHub Actions (cron) | Gratuito |
 | Persistência de estado | `fixtures_state.json` no repositório | Gratuito |
 
-**Consumo de requests:** 2 execuções/dia × 1 pedido (`/v4/matches` já traz as duas competições de uma vez) = 2 requests/dia (do limite de 10/min).
+**Consumo de requests:** 2 execuções/dia × 1 pedido (`/v4/teams/{id}/matches` já traz as duas competições de uma vez) = 2 requests/dia (do limite de 10/min).
 
 ---
 
@@ -55,20 +57,22 @@ football-calendar-sync/
    caso contrário a conta e os dados são apagados automaticamente ao fim de um tempo de inatividade
 3. Testa no browser ou terminal para confirmar que funciona:
    ```bash
-   curl -H "X-Auth-Token: o_teu_token" "https://api.football-data.org/v4/matches?competitions=PPL,CL"
+   curl -H "X-Auth-Token: o_teu_token" "https://api.football-data.org/v4/teams/498/matches?competitionIds=2017,2001&dateFrom=2026-08-01&dateTo=2027-06-01"
    ```
-   (deves ver os próximos jogos da Primeira Liga e da Champions League)
+   (deves ver os próximos jogos do Sporting CP na Primeira Liga e na Champions League)
 
-**Códigos das competições usadas:**
-| Competição | Código |
+**IDs já confirmados e usados no `sync.py`:**
+| Recurso | ID |
 |---|---|
-| Primeira Liga Portuguesa | `PPL` |
-| Champions League | `CL` |
+| Sporting Clube de Portugal (equipa) | `498` |
+| Primeira Liga Portuguesa (competição) | `2017` |
+| UEFA Champions League (competição) | `2001` |
 
-**Filtro por equipa:** o plano gratuito não expõe de forma fiável o endpoint por ID de equipa,
-por isso o `sync.py` vai buscar todos os jogos das competições (numa única chamada a `/v4/matches`)
-e filtra localmente por nome (`TEAM_NAME = "Sporting CP"` em `sync.py`, comparado contra nome,
-nome curto e sigla da equipa).
+> 💡 Nota: a API distingue **código** (`PPL`, `CL` — usado em `/v4/competitions/{code}`)
+> de **ID numérico** (`2017`, `2001` — exigido pelo parâmetro `competitionIds` do
+> endpoint de jogos por equipa). Se precisares de outros IDs, consulta
+> `/v4/competitions/{code}` (devolve o `id`) ou `/v4/competitions/{code}/teams` (lista
+> equipas e os seus `id`).
 
 **Rate limiting:** a API devolve o header `X-Requests-Available-Minute` com os pedidos que
 ainda restam na janela atual, e um `Retry-After` quando responde 429. O `sync.py` lê estes
@@ -158,7 +162,7 @@ Os segredos são armazenados de forma segura no GitHub e nunca ficam expostos no
 
 ### Secret 1: `FOOTBALL_DATA_TOKEN`
 - **Name:** `FOOTBALL_DATA_TOKEN`
-- **Value:** o teu token da football-data.org
+- **Value:** o token que recebeste por email da football-data.org
 
 ### Secret 2: `GOOGLE_CREDENTIALS`
 - **Name:** `GOOGLE_CREDENTIALS`
@@ -196,18 +200,30 @@ python sync.py
 
 Se tudo correr bem, deves ver no terminal algo como:
 ```
-2026-07-12 10:00:01 [INFO] === Football Calendar Sync iniciado ===
-2026-07-12 10:00:01 [INFO] A autenticar na Google Calendar API...
-2026-07-12 10:00:02 [INFO] A ir buscar jogos à football-data.org...
-2026-07-12 10:00:02 [INFO] Pedidos disponíveis neste minuto (football-data.org): 9
-2026-07-12 10:00:02 [INFO] Jogos encontrados: 26 no total, 3 do Sporting CP
-2026-07-12 10:00:03 [INFO] Total de jogos do Sporting CP obtidos: 3
-2026-07-12 10:00:04 [INFO] ✅ CRIADO  [22/03/2026 21:15] ⚽ Sporting CP vs SL Benfica — evt_abc123
+2026-07-13 10:00:01 [INFO] === Football Calendar Sync iniciado ===
+2026-07-13 10:00:01 [INFO] A autenticar na Google Calendar API...
+2026-07-13 10:00:02 [INFO] A ir buscar jogos à football-data.org...
+2026-07-13 10:00:02 [INFO] Pedidos disponíveis neste minuto (football-data.org): 9
+2026-07-13 10:00:02 [INFO] Jogos encontrados para a equipa 498: 3
+2026-07-13 10:00:03 [INFO] Total de jogos obtidos: 3
+2026-07-13 10:00:04 [INFO] ✅ CRIADO  [22/03/2026 21:15] ⚽ Sporting CP vs SL Benfica — evt_abc123
 ...
-2026-07-12 10:00:06 [INFO] Sincronização concluída — ✅ criados: 3 | 🔄 atualizados: 0 | 🗑️  removidos: 0 | ⏭️  ignorados: 0
+2026-07-13 10:00:06 [INFO] Sincronização concluída — ✅ criados: 3 | 🔄 atualizados: 0 | 🗑️  removidos: 0 | ⏭️  ignorados: 0
 ```
 
 E no teu Google Calendar aparecerão os eventos com cores diferentes por competição.
+
+### Testar já com jogos reais (antes da Primeira Liga começar)
+
+Como a Primeira Liga só começa em agosto, para testar já com jogos que estão mesmo a
+acontecer (ex: Mundial 2026), muda temporariamente no `sync.py`:
+```python
+TEAM_ID = 760                          # Seleção Espanhola (tem jogos agora)
+COMPETITIONS = {2000: "FIFA World Cup 🌍"}
+COMPETITION_COLORS = {2000: "11"}
+```
+Corre `python sync.py`, confirma que os eventos aparecem no calendário, e depois reverte
+para `TEAM_ID = 498` e as competições da Primeira Liga/Champions League.
 
 ### Correr os testes automatizados
 
@@ -234,31 +250,31 @@ A partir daí, corre automaticamente às **9h e às 19h (Lisboa)** todos os dias
 
 ## Personalização
 
-### Seguir outro clube (ou remover o filtro)
+### Seguir outro clube
 
-No `sync.py`, altera a linha:
+No `sync.py`, altera:
 ```python
-TEAM_NAME = "Sporting CP"
+TEAM_ID = 498  # Sporting CP
 ```
-Para o nome tal como aparece na football-data.org (ex: `"FC Porto"`), ou deixa `""` para
-seguir todos os jogos das competições configuradas, sem filtrar por equipa.
+Para o ID da equipa que quiseres (consulta `/v4/competitions/{code}/teams` para encontrar o ID).
 
 ### Adicionar ou remover competições
 
-No `sync.py`, edita o dicionário `COMPETITIONS` (usa os códigos da football-data.org, ex: `PL` = Premier League, `PD` = La Liga):
+No `sync.py`, edita o dicionário `COMPETITIONS` (usa os **IDs numéricos**, não os códigos —
+consulta `/v4/competitions/{code}` para encontrar o `id` de uma competição):
 ```python
 COMPETITIONS = {
-    "PPL": "Primeira Liga 🇵🇹",
-    "CL": "Champions League 🏆",
-    "EL": "Liga Europa 🌍",    # Adicionar (verifica o código exato na documentação da API)
+    2017: "Primeira Liga 🇵🇹",
+    2001: "Champions League 🏆",
+    2146: "Liga Europa 🌍",    # Adicionar (verifica o ID exato na API)
 }
 ```
 E a cor correspondente em `COMPETITION_COLORS`:
 ```python
 COMPETITION_COLORS = {
-    "PPL": "10",
-    "CL": "3",
-    "EL": "7",    # Adicionar — cor pavão
+    2017: "10",
+    2001: "3",
+    2146: "7",    # Adicionar — cor pavão
 }
 ```
 
@@ -310,20 +326,20 @@ O ficheiro `fixtures_state.json` é o "cérebro" do sistema. Guarda a correspond
     "event_id": "abc123def456ghi789",
     "home": "Sporting CP",
     "away": "SL Benfica",
-    "competition": "PPL"
+    "competition": 2017
   },
   "497601": {
     "date": "2026-03-26T19:00:00Z",
     "event_id": "xyz987uvw654rst321",
     "home": "FC Porto",
     "away": "Sporting CP",
-    "competition": "PPL"
+    "competition": 2017
   }
 }
 ```
 
 A cada execução:
-1. Vai buscar os jogos de cada competição à API e filtra pelo `TEAM_NAME`
+1. Vai buscar os jogos do Sporting CP nas competições configuradas (`/v4/teams/498/matches`)
 2. Compara `match_id` com os que estão no state
 3. **Novo ID** → cria evento + adiciona ao state
 4. **ID existente mas data diferente** → atualiza evento + atualiza state
@@ -347,9 +363,8 @@ Confirma que o Secret `GOOGLE_CREDENTIALS` está criado no GitHub e contém o JS
 1. Confirma que o calendário foi partilhado com o email da Service Account
 2. Confirma que as permissões são "Fazer alterações a eventos" (não só "Ver eventos")
 3. Se usas `CALENDAR_ID` personalizado, confirma que o ID está correto
-4. Confirma que `TEAM_NAME` corresponde exatamente ao nome usado pela football-data.org
-   (podes ver os nomes reais correndo `curl -H "X-Auth-Token: ..." "https://api.football-data.org/v4/matches?competitions=PPL,CL"`
-   e inspecionando os campos `homeTeam`/`awayTeam`)
+4. Confirma que `TEAM_ID` e os IDs em `COMPETITIONS` estão corretos — testa diretamente:
+   `curl -H "X-Auth-Token: ..." "https://api.football-data.org/v4/teams/498/matches?competitionIds=2017,2001"`
 
 ### "403 Forbidden" da Google Calendar API
 A Service Account não tem permissão para escrever no calendário.
@@ -381,7 +396,7 @@ demasiadas vezes seguidas (ex: em loop de testes) — espera um minuto e tenta d
 
 | Serviço | Plano | Limite gratuito | Uso estimado |
 |---|---|---|---|
-| football-data.org | Free | 10 pedidos/minuto | ~4 pedidos/dia |
+| football-data.org | Free | 10 pedidos/minuto | ~2 pedidos/dia |
 | Google Calendar API | Free | Sem limite prático para uso pessoal | ~5 operações/dia |
 | GitHub Actions | Free | 2.000 min/mês | ~2 min/dia = ~60 min/mês |
 
