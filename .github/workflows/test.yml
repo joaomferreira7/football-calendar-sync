@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [dev]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache de dependências pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('requirements.txt', 'requirements-dev.txt') }}
+          restore-keys: pip-
+
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+
+      - name: Correr testes
+        run: python -m pytest test_sync.py -v
