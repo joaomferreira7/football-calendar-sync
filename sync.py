@@ -14,9 +14,15 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 import requests
+from dotenv import load_dotenv
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+# Em execução local, lê FOOTBALL_DATA_TOKEN/GOOGLE_CREDENTIALS de um ficheiro
+# .env (procurado na pasta atual e nas pastas acima). No GitHub Actions isto
+# não faz nada — não há .env no runner, as env vars vêm dos Secrets.
+load_dotenv()
 
 # Os logs usam emojis; a codepage por omissão do terminal do Windows (cp1252)
 # não os consegue codificar e o script rebenta com UnicodeEncodeError.
@@ -78,8 +84,11 @@ REMINDER_MINUTES = 30
 # Ficheiro de estado local
 STATE_FILE = "fixtures_state.json"
 
-# Calendário onde criar os eventos ("primary" = calendário principal)
-CALENDAR_ID = "primary"
+# Calendário onde criar os eventos. NÃO uses "primary" — isso refere-se ao
+# calendário da própria Service Account (que não é visível para ti), não ao
+# teu calendário pessoal. Usa o ID do calendário que partilhaste (Fase 2.4):
+# para um Google Calendar pessoal, o ID é o teu próprio email da Google.
+CALENDAR_ID = "joaof89036@gmail.com"
 
 # ---------------------------------------------------------------------------
 # Autenticação Google Calendar

@@ -2,9 +2,8 @@ name: Football Calendar Sync
 
 on:
   schedule:
-    # Corre às 8h00 UTC (9h Lisboa) e às 18h00 UTC (19h Lisboa)
+    # Corre 1x por dia, às 8h00 UTC (9h Lisboa)
     - cron: '0 8 * * *'
-    - cron: '0 18 * * *'
 
   # Permite correr manualmente no separador Actions do GitHub
   workflow_dispatch:

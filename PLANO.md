@@ -26,7 +26,7 @@ por isso não é preciso filtrar nada localmente — tudo o que a API devolve j�
 | Scheduler | GitHub Actions (cron) | Gratuito |
 | Persistência de estado | `fixtures_state.json` no repositório | Gratuito |
 
-**Consumo de requests:** 2 execuções/dia × 1 pedido (`/v4/teams/{id}/matches` já traz as duas competições de uma vez) = 2 requests/dia (do limite de 10/min).
+**Consumo de requests:** 1 execução/dia × 1 pedido (`/v4/teams/{id}/matches` já traz as duas competições de uma vez) = 1 request/dia (do limite de 10/min).
 
 ---
 
@@ -119,10 +119,21 @@ mas protege testes manuais repetidos em pouco tempo.
 4. Cola o email da Service Account (parecido com `football-sync-bot@football-calendar-sync.iam.gserviceaccount.com`)
 5. Permissões: **Fazer alterações a eventos** → **Enviar**
 
-> 💡 O `CALENDAR_ID = "primary"` no `sync.py` refere-se ao calendário principal.
-> Se quiseres usar um calendário separado (recomendado para manter organizado),
-> cria um novo calendário chamado "Sporting", partilha-o com a service account,
-> e substitui `"primary"` pelo ID do calendário (visível nas definições do calendário).
+> ⚠️ **Não uses `CALENDAR_ID = "primary"`.** Isso refere-se ao calendário da
+> própria Service Account (uma conta "robô" sem calendário visível para ti) —
+> não ao teu calendário pessoal, mesmo depois de o partilhares. Os eventos são
+> criados na mesma, só que ficam invisíveis para ti.
+>
+> Usa antes o **ID do calendário que partilhaste**: para o teu calendário
+> principal do Google, o ID é o teu próprio email do Google (o mesmo endereço
+> com que fizeste a partilha no passo 4 acima). No `sync.py`:
+> ```python
+> CALENDAR_ID = "o_teu_email@gmail.com"
+> ```
+> Se preferires um calendário separado (recomendado para manter organizado),
+> cria um novo calendário chamado "Sporting", partilha-o com a service account
+> da mesma forma, e usa o **Calendar ID** desse calendário (visível nas
+> definições do calendário, tem o formato `algo@group.calendar.google.com`).
 
 ---
 
@@ -244,7 +255,7 @@ Estes testes usam mocks — não tocam na API real nem no teu Google Calendar.
 4. Clica em **Football Calendar Sync** no menu lateral
 5. Clica em **Run workflow** → **Run workflow** para testar manualmente a primeira vez
 
-A partir daí, corre automaticamente às **9h e às 19h (Lisboa)** todos os dias.
+A partir daí, corre automaticamente às **9h (Lisboa)**, todos os dias.
 
 ---
 
@@ -285,7 +296,7 @@ COMPETITION_COLORS = {
 3. Nas definições do calendário, copia o **Calendar ID** (parece um email longo)
 4. No `sync.py`, substitui:
    ```python
-   CALENDAR_ID = "primary"
+   CALENDAR_ID = "o_teu_email@gmail.com"
    ```
    Por:
    ```python
@@ -309,7 +320,9 @@ REMINDER_MINUTES = 30  # lembrete 30 min antes
 No `.github/workflows/sync.yml`:
 ```yaml
 - cron: '0 8 * * *'    # 8h UTC = 9h Lisboa
-- cron: '0 18 * * *'   # 18h UTC = 19h Lisboa
+
+# Para voltar a correr 2x por dia, adiciona outra linha, ex:
+# - cron: '0 18 * * *'   # 18h UTC = 19h Lisboa
 ```
 Sintaxe cron: `minuto hora dia-mês mês dia-semana`
 
@@ -360,9 +373,13 @@ Confirma que o Secret `FOOTBALL_DATA_TOKEN` está criado no GitHub (ou a variáv
 Confirma que o Secret `GOOGLE_CREDENTIALS` está criado no GitHub e contém o JSON completo.
 
 ### Eventos não aparecem no calendário
-1. Confirma que o calendário foi partilhado com o email da Service Account
-2. Confirma que as permissões são "Fazer alterações a eventos" (não só "Ver eventos")
-3. Se usas `CALENDAR_ID` personalizado, confirma que o ID está correto
+1. **`CALENDAR_ID = "primary"` é o erro mais comum aqui** — isso é o calendário
+   da Service Account, não o teu. Confirma que `CALENDAR_ID` está definido
+   como o teu email do Google (ou o Calendar ID de um calendário dedicado).
+   O script não dá erro nenhum neste caso (o evento é criado na mesma, só que
+   num calendário que não vês), por isso é fácil passar despercebido.
+2. Confirma que o calendário foi partilhado com o email da Service Account
+3. Confirma que as permissões são "Fazer alterações a eventos" (não só "Ver eventos")
 4. Confirma que `TEAM_ID` e os IDs em `COMPETITIONS` estão corretos — testa diretamente:
    `curl -H "X-Auth-Token: ..." "https://api.football-data.org/v4/teams/498/matches?competitionIds=2017,2001"`
 
@@ -396,7 +413,7 @@ demasiadas vezes seguidas (ex: em loop de testes) — espera um minuto e tenta d
 
 | Serviço | Plano | Limite gratuito | Uso estimado |
 |---|---|---|---|
-| football-data.org | Free | 10 pedidos/minuto | ~2 pedidos/dia |
+| football-data.org | Free | 10 pedidos/minuto | ~1 pedido/dia |
 | Google Calendar API | Free | Sem limite prático para uso pessoal | ~5 operações/dia |
 | GitHub Actions | Free | 2.000 min/mês | ~2 min/dia = ~60 min/mês |
 
