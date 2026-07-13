@@ -1,1 +1,23 @@
-{}
+{
+  "567260": {
+    "date": "2026-08-08T15:00:00Z",
+    "event_id": "crn3m850c5dosjs5uh5kl4c924",
+    "home": "CF Estrela da Amadora",
+    "away": "Sporting Clube de Portugal",
+    "competition": 2017
+  },
+  "567268": {
+    "date": "2026-08-16T15:00:00Z",
+    "event_id": "k6prqn9m00c9fim0754qcj1amo",
+    "home": "Sporting Clube de Portugal",
+    "away": "Vitória SC",
+    "competition": 2017
+  },
+  "567275": {
+    "date": "2026-08-23T15:00:00Z",
+    "event_id": "v1e4rbemb9ofm4t3ala3teg22o",
+    "home": "Sporting Clube de Portugal",
+    "away": "FC Alverca",
+    "competition": 2017
+  }
+}
