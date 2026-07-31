@@ -64,7 +64,7 @@ def test_creates_event_for_new_match():
 def test_skips_match_already_in_state_with_same_date():
     service = make_service()
     matches = [make_match("m1", "2026-03-22T21:15:00Z")]
-    state = {"m1": {"date": "2026-03-22T21:15:00Z", "event_id": "evt_old",
+    state = {"m1": {"date": "2026-03-22T21:15:00Z", "colorId": "10", "event_id": "evt_old",
                      "home": "Sporting CP", "away": "SL Benfica", "competition": 2017}}
 
     sync.sync(matches, state, service)

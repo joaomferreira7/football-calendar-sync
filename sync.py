@@ -285,12 +285,15 @@ def sync(matches: list, state: dict, service) -> dict:
             skipped += 1
             continue
 
+        new_color = match.get("colorId", "1")
+
         if mid not in state:
             # Jogo novo — criar evento
             try:
                 event_id = create_calendar_event(service, match)
                 state[mid] = {
                     "date": new_date,
+                    "colorId": new_color,
                     "event_id": event_id,
                     "home": match["homeTeam"]["name"],
                     "away": match["awayTeam"]["name"],
@@ -300,11 +303,12 @@ def sync(matches: list, state: dict, service) -> dict:
             except Exception as e:
                 log.error("Erro ao criar evento para jogo %s: %s", mid, e)
 
-        elif state[mid]["date"] != new_date:
-            # Horário alterado — atualizar evento
+        elif state[mid]["date"] != new_date or state[mid].get("colorId") != new_color:
+            # Horário e/ou cor alterados — atualizar evento
             try:
                 update_calendar_event(service, state[mid]["event_id"], match)
                 state[mid]["date"] = new_date
+                state[mid]["colorId"] = new_color
                 updated += 1
             except HttpError as e:
                 if e.resp.status == 404:
@@ -313,6 +317,7 @@ def sync(matches: list, state: dict, service) -> dict:
                         event_id = create_calendar_event(service, match)
                         state[mid]["event_id"] = event_id
                         state[mid]["date"] = new_date
+                        state[mid]["colorId"] = new_color
                         created += 1
                     except Exception as e2:
                         log.error("Erro ao recriar evento para jogo %s: %s", mid, e2)
