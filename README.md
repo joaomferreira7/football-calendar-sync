@@ -9,8 +9,8 @@ Os jogos vêm do **zerozero.pt** (scraping da página de jogos de cada equipa, v
 `zerozero_scraper.py`) — todas as competições oficiais listadas na página, sem limite de
 datas: a época toda, do primeiro ao último jogo agendado.
 
-Corre automaticamente **4x por dia** via GitHub Actions (a cada 6h), sem qualquer servidor
-ou custo — ver [Custo](#custo-total-0).
+Corre automaticamente **1x por dia** via GitHub Actions, sem qualquer servidor ou custo —
+ver [Custo](#custo-total-0).
 
 ---
 
@@ -25,7 +25,7 @@ ou custo — ver [Custo](#custo-total-0).
 | Scheduler | GitHub Actions (cron) | Gratuito |
 | Persistência de estado | `fixtures_state.json` no repositório | Gratuito |
 
-**Consumo de pedidos:** 4 execuções/dia × 1 pedido por equipa configurada em `TEAMS` ao
+**Consumo de pedidos:** 1 execução/dia × 1 pedido por equipa configurada em `TEAMS` ao
 zerozero.pt (sem limite formal, ver [Uso responsável](#uso-responsável) abaixo).
 
 ## Estrutura do repositório
@@ -33,7 +33,7 @@ zerozero.pt (sem limite formal, ver [Uso responsável](#uso-responsável) abaixo
 ```
 football-calendar-sync/
 ├── .github/workflows/
-│   ├── sync.yml              ← cron job automático (4x por dia)
+│   ├── sync.yml              ← cron job automático (1x por dia)
 │   └── test.yml               ← corre os testes em PRs para main
 ├── sync.py                   ← script principal: lógica de sincronização com o Calendar
 ├── zerozero_scraper.py       ← scraping do zerozero.pt (fonte dos jogos)
@@ -124,7 +124,7 @@ provavelmente mudou a estrutura da página. Passo a passo:
 
 ### Uso responsável
 
-- `sync.py` faz no máximo 1 pedido por equipa por execução (4 execuções/dia agendadas)
+- `sync.py` faz no máximo 1 pedido por equipa por execução (1 execução/dia agendada)
 - Não corras o script em loop apertado — é scraping de um site real, não uma API pública
   com limites documentados
 
@@ -215,7 +215,7 @@ No repositório → separador **Actions** → (se pedir) **I understand my workf
 and enable them** → **Football Calendar Sync → Run workflow** para testar manualmente a
 primeira vez.
 
-A partir daí corre sozinho, 4x por dia (ver [Mudar a frequência do cron](#mudar-a-frequência-do-cron)
+A partir daí corre sozinho, 1x por dia (ver [Mudar a frequência do cron](#mudar-a-frequência-do-cron)
 para ajustar).
 
 ---
@@ -250,10 +250,11 @@ REMINDER_MINUTES = 30  # lembrete 30 min antes
 
 Em `.github/workflows/sync.yml`:
 ```yaml
-- cron: '0 8,14,20,2 * * *'   # 4x/dia — 8h,14h,20h,2h UTC = 9h,15h,21h,3h Lisboa
+- cron: '0 8 * * *'   # 1x/dia — 8h UTC = 9h Lisboa (verão) / 8h Lisboa (inverno)
 ```
-Sintaxe cron: `minuto hora dia-mês mês dia-semana`. Cada horário adicional soma ~1
-pedido/dia ao zerozero.pt por equipa e ~2 min/execução à quota do GitHub Actions (limite
+Sintaxe cron: `minuto hora dia-mês mês dia-semana`. Para voltar a correr mais vezes por
+dia, usa uma lista de horas (ex: `0 8,20 * * *` para 2x/dia). Cada horário adicional soma
+~1 pedido/dia ao zerozero.pt por equipa e ~2 min/execução à quota do GitHub Actions (limite
 gratuito: 2.000 min/mês).
 
 ---
@@ -296,6 +297,6 @@ manualmente em **Actions → Run workflow**.
 
 | Serviço | Plano | Limite gratuito | Uso estimado |
 |---|---|---|---|
-| zerozero.pt (scraping) | — | sem limite formal | ~4 pedidos/dia por equipa |
+| zerozero.pt (scraping) | — | sem limite formal | ~1 pedido/dia por equipa |
 | Google Calendar API | Free | Sem limite prático para uso pessoal | ~5 operações/dia |
-| GitHub Actions | Free | 2.000 min/mês | ~4 min/dia = ~120 min/mês |
+| GitHub Actions | Free | 2.000 min/mês | ~1 min/dia = ~30 min/mês |
