@@ -2,8 +2,8 @@
 Testes para a lógica de sincronização em sync.py.
 
 Não tocam em nenhuma API real: o serviço da Google Calendar é um MagicMock
-e os "jogos" são dicionários construídos à mão com a forma que a
-football-data.org devolve (endpoint /v4/teams/{id}/matches).
+e os "jogos" são dicionários construídos à mão na forma que zerozero_scraper
+devolve (ver zerozero_scraper.fetch_team_matches).
 """
 
 from types import SimpleNamespace
@@ -14,18 +14,19 @@ from googleapiclient.errors import HttpError
 import sync
 
 
-def make_match(match_id, date, status="SCHEDULED", home="Sporting CP", away="SL Benfica",
-                competition_id=2017, competition_name="Primeira Liga", matchday=1):
+def make_match(match_id, date, status="SCHEDULED", home="Sporting", away="SL Benfica",
+                competition_name="Primeira Liga", matchday=1, color_id="10"):
     return {
         "id": match_id,
         "utcDate": date,
         "status": status,
         "matchday": matchday,
         "stage": "REGULAR_SEASON",
-        "venue": "Estádio José Alvalade",
-        "homeTeam": {"name": home, "shortName": home, "tla": "SCP" if home == "Sporting CP" else "XXX"},
-        "awayTeam": {"name": away, "shortName": away, "tla": "SLB" if away == "SL Benfica" else "XXX"},
-        "competition": {"id": competition_id, "name": competition_name},
+        "venue": "",
+        "homeTeam": {"name": home},
+        "awayTeam": {"name": away},
+        "competition": {"id": f"zz-{competition_name}", "name": competition_name},
+        "colorId": color_id,
     }
 
 
@@ -153,17 +154,18 @@ def test_creation_failure_does_not_crash_the_whole_batch():
     assert state["fine"]["event_id"] == "evt_ok"
 
 
-def test_build_event_body_uses_competition_color_and_summary():
-    match = make_match("m1", "2026-03-22T21:15:00Z", competition_id=2001, competition_name="Champions League")
+def test_build_event_body_uses_match_color_and_summary():
+    match = make_match("m1", "2026-03-22T21:15:00Z", color_id="5")
 
     body = sync.build_event_body(match)
 
-    assert body["summary"] == "⚽ Sporting CP vs SL Benfica"
-    assert body["colorId"] == sync.COMPETITION_COLORS[2001]
+    assert body["summary"] == "⚽ Sporting vs SL Benfica"
+    assert body["colorId"] == "5"
 
 
-def test_build_event_body_falls_back_to_default_color_for_unknown_competition():
-    match = make_match("m1", "2026-03-22T21:15:00Z", competition_id=9999, competition_name="Taça Misteriosa")
+def test_build_event_body_falls_back_to_default_color_when_missing():
+    match = make_match("m1", "2026-03-22T21:15:00Z")
+    del match["colorId"]
 
     body = sync.build_event_body(match)
 
