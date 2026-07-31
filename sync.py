@@ -1,17 +1,20 @@
 """
 football-calendar-sync
-Sincroniza os jogos do Sporting CP (Primeira Liga e Champions League)
-com o Google Calendar, detetando novos jogos e alterações de horário.
+Sincroniza os jogos do Sporting CP e do FC Penafiel (todas as competições
+oficiais listadas na respetiva página do zerozero.pt) com o Google Calendar,
+detetando novos jogos e alterações de horário.
 
-Fonte de dados: football-data.org (plano gratuito).
+Fonte de dados: zerozero.pt (scraping, ver zerozero_scraper.py). Cada equipa
+em TEAMS é normalizada para a mesma forma de "match" antes de chegar a
+sync(), que trata todos os jogos da mesma maneira independentemente da
+equipa de onde vieram.
 """
 
 import os
 import sys
 import json
-import time
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 import requests
 from dotenv import load_dotenv
@@ -19,9 +22,11 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# Em execução local, lê FOOTBALL_DATA_TOKEN/GOOGLE_CREDENTIALS de um ficheiro
-# .env (procurado na pasta atual e nas pastas acima). No GitHub Actions isto
-# não faz nada — não há .env no runner, as env vars vêm dos Secrets.
+import zerozero_scraper
+
+# Em execução local, lê GOOGLE_CREDENTIALS de um ficheiro .env (procurado na
+# pasta atual e nas pastas acima). No GitHub Actions isto não faz nada — não
+# há .env no runner, a env var vem dos Secrets.
 load_dotenv()
 
 # Os logs usam emojis; a codepage por omissão do terminal do Windows (cp1252)
@@ -44,33 +49,26 @@ log = logging.getLogger(__name__)
 # Configuração — edita aqui as tuas preferências
 # ---------------------------------------------------------------------------
 
-# ID da equipa a seguir na football-data.org (endpoint /v4/teams/{id}/matches
-# já devolve só os jogos desta equipa, não é preciso filtrar mais nada).
-# Sporting CP = 498.
+# Equipas seguidas via scraping do zerozero.pt. Cada jogo recebe sempre a
+# mesma cor por equipa, independentemente da competição — mais simples do
+# que mapear cores por competição, e suficiente para distinguir as equipas
+# no calendário.
 #
-# Para testar com jogos que estejam mesmo a acontecer (ex: enquanto a
-# Primeira Liga ainda não começou), troca temporariamente por:
-#   TEAM_ID = 760                          # Seleção Espanhola
-#   COMPETITIONS = {2000: "FIFA World Cup 🌍"}
-TEAM_ID = 498
-
-# IDs numéricos das competições a incluir — a API exige o ID aqui, não o
-# código (ex: Primeira Liga é "PPL" como código mas 2017 como ID).
-COMPETITIONS = {
-    2017: "Primeira Liga 🇵🇹",
-    2001: "Champions League 🏆",
-}
-
-# Janela de dias à frente a ir buscar jogos
-DAYS_AHEAD = 45
-
-# Cores dos eventos no Google Calendar por competição (1–11)
+# Cores disponíveis no Google Calendar (1–11):
 # 1 lavanda, 2 sálvia, 3 uva, 4 flamingo, 5 banana, 6 tangerina,
 # 7 pavão, 8 mirtilos, 9 mirtilo escuro, 10 basil, 11 tomate
-COMPETITION_COLORS = {
-    2017: "10",  # verde — Primeira Liga
-    2001: "3",   # uva   — Champions League
-}
+TEAMS = [
+    {
+        "nome": "Sporting",
+        "url": "https://www.zerozero.pt/equipa/sporting/jogos",
+        "colorId": "2",  # verde
+    },
+    {
+        "nome": "FC Penafiel",
+        "url": "https://www.zerozero.pt/equipa/fc-penafiel/30/jogos",
+        "colorId": "11",  # banana
+    },
+]
 
 # Estados de jogo a ignorar (já aconteceram ou não vão realizar-se como previsto)
 IGNORED_STATUSES = {"FINISHED", "IN_PLAY", "PAUSED", "CANCELLED"}
@@ -115,60 +113,27 @@ def get_calendar_service():
 
 
 # ---------------------------------------------------------------------------
-# football-data.org
+# zerozero.pt
 # ---------------------------------------------------------------------------
 
-API_BASE = "https://api.football-data.org/v4"
-
-
-def _api_headers():
-    token = os.environ.get("FOOTBALL_DATA_TOKEN")
-    if not token:
-        raise EnvironmentError("Variável de ambiente FOOTBALL_DATA_TOKEN não definida.")
-    return {"X-Auth-Token": token}
-
-
-def _api_get(url: str, params: dict):
-    """GET à football-data.org que respeita os headers de rate limit.
-
-    A API expõe X-Requests-Available-Minute (pedidos que ainda restam
-    na janela atual) e, num 429, Retry-After. Como só fazemos ~1 pedido
-    por execução isto raramente entra em ação, mas protege execuções
-    manuais/testes repetidos de seguida contra o rate limiter.
+def fetch_matches() -> list:
+    """Vai buscar os próximos jogos das equipas configuradas em TEAMS. Cada
+    equipa é isolada num try/except — se o zerozero.pt mudar de estrutura e
+    partir o scraping de uma equipa, isso não deve impedir a sincronização
+    dos jogos das outras.
     """
-    resp = requests.get(url, headers=_api_headers(), params=params, timeout=15)
-
-    remaining = resp.headers.get("X-Requests-Available-Minute")
-    if remaining is not None:
-        log.info("Pedidos disponíveis neste minuto (football-data.org): %s", remaining)
-
-    if resp.status_code == 429:
-        retry_after = int(resp.headers.get("Retry-After", 60))
-        log.warning("Rate limit atingido (429). A aguardar %ds antes de repetir...", retry_after)
-        time.sleep(retry_after)
-        resp = requests.get(url, headers=_api_headers(), params=params, timeout=15)
-
-    resp.raise_for_status()
-    return resp
-
-
-def fetch_all_matches() -> list:
-    """Vai buscar, numa única chamada, os próximos jogos da equipa (TEAM_ID)
-    nas competições configuradas."""
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    future = (datetime.now(timezone.utc) + timedelta(days=DAYS_AHEAD)).strftime("%Y-%m-%d")
-
-    params = {
-        "competitionIds": ",".join(str(c) for c in COMPETITIONS),
-        "dateFrom": today,
-        "dateTo": future,
-    }
-
-    resp = _api_get(f"{API_BASE}/teams/{TEAM_ID}/matches", params=params)
-    data = resp.json()
-
-    matches = data.get("matches", [])
-    log.info("Jogos encontrados para a equipa %s: %d", TEAM_ID, len(matches))
+    matches = []
+    for equipa in TEAMS:
+        try:
+            matches.extend(
+                zerozero_scraper.fetch_team_matches(
+                    equipa["nome"], equipa["url"], equipa["colorId"]
+                )
+            )
+        except requests.exceptions.RequestException as e:
+            log.error("zerozero.pt: erro ao ir buscar jogos de %s: %s", equipa["nome"], e)
+        except Exception as e:
+            log.error("zerozero.pt: erro inesperado ao processar %s: %s", equipa["nome"], e)
     return matches
 
 
@@ -215,7 +180,6 @@ def build_event_body(match: dict) -> dict:
     """Constrói o corpo do evento para a Google Calendar API."""
     home = match["homeTeam"]["name"]
     away = match["awayTeam"]["name"]
-    competition_id = match["competition"]["id"]
     competition_name = match["competition"]["name"]
     matchday = match.get("matchday")
     stage = match.get("stage")
@@ -244,7 +208,7 @@ def build_event_body(match: dict) -> dict:
             "dateTime": add_duration(start_dt),
             "timeZone": "Europe/Lisbon",
         },
-        "colorId": COMPETITION_COLORS.get(competition_id, "1"),
+        "colorId": match.get("colorId", "1"),
         "reminders": {
             "useDefault": False,
             "overrides": [
@@ -300,7 +264,7 @@ def delete_calendar_event(service, event_id: str, match_id: str):
 
 def sync(matches: list, state: dict, service) -> dict:
     """
-    Compara os jogos da API com o estado guardado e sincroniza o Google Calendar.
+    Compara os jogos obtidos com o estado guardado e sincroniza o Google Calendar.
 
     Casos tratados:
     - Novo jogo encontrado       → cria evento + guarda no estado
@@ -359,7 +323,7 @@ def sync(matches: list, state: dict, service) -> dict:
         else:
             skipped += 1
 
-    # Jogos que desapareceram da API (cancelados ou adiados indefinidamente)
+    # Jogos que desapareceram da fonte (cancelados ou adiados indefinidamente)
     for mid in list(state.keys()):
         if mid not in api_match_ids:
             try:
@@ -394,9 +358,9 @@ def main():
     state = load_state()
     log.info("Estado carregado: %d jogos em memória", len(state))
 
-    # 3. Ir buscar jogos à API
-    log.info("A ir buscar jogos à football-data.org...")
-    matches = fetch_all_matches()
+    # 3. Ir buscar jogos ao zerozero.pt
+    log.info("A ir buscar jogos ao zerozero.pt...")
+    matches = fetch_matches()
     log.info("Total de jogos obtidos: %d", len(matches))
 
     if not matches:

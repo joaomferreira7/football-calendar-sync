@@ -41,7 +41,6 @@ jobs:
 
       - name: Correr sincronização
         env:
-          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
         run: python sync.py
 
