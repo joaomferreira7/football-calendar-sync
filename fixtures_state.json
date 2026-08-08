@@ -16,7 +16,7 @@
     "colorId": "11"
   },
   "zz-12278221": {
-    "date": "2026-08-30T15:30:00+01:00",
+    "date": "2026-08-30T18:00:00+01:00",
     "event_id": "hhpq0i4h70m7atb5s2jf8aglqg",
     "home": "FC Porto",
     "away": "FC Penafiel",
@@ -24,7 +24,7 @@
     "colorId": "11"
   },
   "zz-12278203": {
-    "date": "2026-08-23T15:30:00+01:00",
+    "date": "2026-08-23T14:00:00+01:00",
     "event_id": "flnpvmo8ggnkip1g57uopguti8",
     "home": "FC Penafiel",
     "away": "Sporting",
@@ -36,14 +36,6 @@
     "event_id": "7qkuq1p1qr31kacubhdu72e2vk",
     "home": "Torreense",
     "away": "FC Penafiel",
-    "competition": "zz-Liga Portugal 2 Meu Super 26/27",
-    "colorId": "11"
-  },
-  "zz-12278097": {
-    "date": "2026-08-08T14:00:00+01:00",
-    "event_id": "t443gpdim41tkr6gk3dhcjtpf0",
-    "home": "FC Penafiel",
-    "away": "Portimonense",
     "competition": "zz-Liga Portugal 2 Meu Super 26/27",
     "colorId": "11"
   },
@@ -512,7 +504,7 @@
     "colorId": "2"
   },
   "zz-12277991": {
-    "date": "2026-08-30T15:30:00+01:00",
+    "date": "2026-08-28T20:15:00+01:00",
     "event_id": "2hkhj7atbql74af207g82n8to8",
     "home": "Rio Ave",
     "away": "Sporting",
@@ -520,7 +512,7 @@
     "colorId": "2"
   },
   "zz-12277973": {
-    "date": "2026-08-23T15:30:00+01:00",
+    "date": "2026-08-22T20:30:00+01:00",
     "event_id": "248d0qir5lijumf5aavoprvh34",
     "home": "Sporting",
     "away": "FC Alverca",
@@ -542,5 +534,13 @@
     "away": "Sporting",
     "competition": "zz-Liga Portugal Betclic 26/27",
     "colorId": "2"
+  },
+  "zz-12384690": {
+    "date": "2026-09-20T15:00:00+01:00",
+    "colorId": "11",
+    "event_id": "o89oauic4eh608td5gh2k7lsu4",
+    "home": "UD Oliveirense/SC Penalva do Castelo",
+    "away": "FC Penafiel",
+    "competition": "zz-Taça de Portugal 26/27"
   }
 }
