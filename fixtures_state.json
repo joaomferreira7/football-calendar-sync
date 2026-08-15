@@ -32,7 +32,7 @@
     "colorId": "11"
   },
   "zz-12278153": {
-    "date": "2026-08-15T11:00:00+01:00",
+    "date": "2026-08-15T18:00:00+01:00",
     "event_id": "7qkuq1p1qr31kacubhdu72e2vk",
     "home": "Torreense",
     "away": "FC Penafiel",
@@ -516,22 +516,6 @@
     "event_id": "248d0qir5lijumf5aavoprvh34",
     "home": "Sporting",
     "away": "FC Alverca",
-    "competition": "zz-Liga Portugal Betclic 26/27",
-    "colorId": "2"
-  },
-  "zz-12277957": {
-    "date": "2026-08-14T20:15:00+01:00",
-    "event_id": "lf888eb4hftdlgstaksj7gluvk",
-    "home": "Sporting",
-    "away": "Vitória SC",
-    "competition": "zz-Liga Portugal Betclic 26/27",
-    "colorId": "2"
-  },
-  "zz-12277923": {
-    "date": "2026-08-08T20:30:00+01:00",
-    "event_id": "qsvg3ku4vmjv43je1cku3liu6c",
-    "home": "Est. Amadora",
-    "away": "Sporting",
     "competition": "zz-Liga Portugal Betclic 26/27",
     "colorId": "2"
   },
