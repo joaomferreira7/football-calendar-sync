@@ -16,7 +16,10 @@ concurrency:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    # self-hosted: os runners hospedados pelo GitHub (ubuntu-latest) levam 403
+    # Forbidden do zerozero.pt (bloqueio de IPs de datacenter). Corre na
+    # máquina do utilizador para sair de um IP residencial.
+    runs-on: self-hosted
     permissions:
       contents: write   # necessário para fazer commit do state file
 
@@ -45,6 +48,7 @@ jobs:
         run: python sync.py
 
       - name: Guardar estado atualizado (commit automático)
+        shell: bash
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
