@@ -57,6 +57,16 @@ def fetch_team_matches(nome_exibicao: str, url: str, color_id: str) -> list:
 
     matches = []
     for linha in linhas:
+        match_id = linha.get("id")
+        if not match_id:
+            # A página tem dois elementos com id="team_games" (HTML
+            # inválido): o segundo é a tabela de jogos que queremos, mas o
+            # primeiro é uma tabela de resumo por competição (jogos, vitórias,
+            # pontos, ...) que o seletor acima também apanha. As suas linhas
+            # não têm id, ao contrário das linhas de jogos reais — usa-se
+            # isso para as ignorar, em vez de depender da ordem das tabelas.
+            continue
+
         celulas = linha.find_all("td", recursive=False)
         if len(celulas) < 8:
             continue
@@ -88,7 +98,6 @@ def fetch_team_matches(nome_exibicao: str, url: str, color_id: str) -> list:
         adversario = _texto_do_link(celulas[5])
         competicao = _texto_do_link(celulas[7])
         jornada = celulas[8].get_text(strip=True) if len(celulas) > 8 else ""
-        match_id = linha.get("id")
 
         if "C" in indicador:
             home, away = nome_exibicao, adversario
