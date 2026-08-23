@@ -23,14 +23,6 @@
     "competition": "zz-Liga Portugal 2 Meu Super 26/27",
     "colorId": "11"
   },
-  "zz-12278203": {
-    "date": "2026-08-23T14:00:00+01:00",
-    "event_id": "flnpvmo8ggnkip1g57uopguti8",
-    "home": "FC Penafiel",
-    "away": "Sporting",
-    "competition": "zz-Liga Portugal 2 Meu Super 26/27",
-    "colorId": "11"
-  },
   "zz-12278522": {
     "date": "2027-05-16T15:30:00+01:00",
     "event_id": "ifo8avpj26nh72t3e6t914oceo",
@@ -500,14 +492,6 @@
     "event_id": "2hkhj7atbql74af207g82n8to8",
     "home": "Rio Ave",
     "away": "Sporting",
-    "competition": "zz-Liga Portugal Betclic 26/27",
-    "colorId": "2"
-  },
-  "zz-12277973": {
-    "date": "2026-08-22T20:30:00+01:00",
-    "event_id": "248d0qir5lijumf5aavoprvh34",
-    "home": "Sporting",
-    "away": "FC Alverca",
     "competition": "zz-Liga Portugal Betclic 26/27",
     "colorId": "2"
   },
