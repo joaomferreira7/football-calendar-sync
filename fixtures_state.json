@@ -8,7 +8,7 @@
     "colorId": "11"
   },
   "zz-12278295": {
-    "date": "2026-09-06T15:30:00+01:00",
+    "date": "2026-09-05T14:00:00+01:00",
     "event_id": "qh55vjk2eknq3h371iearp169o",
     "home": "FC Penafiel",
     "away": "Académica OAF",
@@ -480,18 +480,10 @@
     "colorId": "2"
   },
   "zz-12278027": {
-    "date": "2026-09-06T15:30:00+01:00",
+    "date": "2026-09-04T20:15:00+01:00",
     "event_id": "sulamg9rfig048nfh6odvr7dq8",
     "home": "Sporting",
     "away": "Nacional",
-    "competition": "zz-Liga Portugal Betclic 26/27",
-    "colorId": "2"
-  },
-  "zz-12277991": {
-    "date": "2026-08-28T20:15:00+01:00",
-    "event_id": "2hkhj7atbql74af207g82n8to8",
-    "home": "Rio Ave",
-    "away": "Sporting",
     "competition": "zz-Liga Portugal Betclic 26/27",
     "colorId": "2"
   },
