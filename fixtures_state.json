@@ -480,7 +480,7 @@
     "colorId": "2"
   },
   "zz-12278027": {
-    "date": "2026-09-04T20:15:00+01:00",
+    "date": "2026-09-05T20:30:00+01:00",
     "event_id": "sulamg9rfig048nfh6odvr7dq8",
     "home": "Sporting",
     "away": "Nacional",
@@ -494,5 +494,69 @@
     "home": "UD Oliveirense/SC Penalva do Castelo",
     "away": "FC Penafiel",
     "competition": "zz-Taça de Portugal 26/27"
+  },
+  "zz-12624704": {
+    "date": "2027-01-27T20:00:00+00:00",
+    "colorId": "2",
+    "event_id": "bpiu477ap7cnccpt1s04522050",
+    "home": "Manchester City",
+    "away": "Sporting",
+    "competition": "zz-UEFA Champions League 26/27"
+  },
+  "zz-12624719": {
+    "date": "2027-01-20T20:00:00+00:00",
+    "colorId": "2",
+    "event_id": "icd4k529otm4dv0k9fghiiphrg",
+    "home": "Sporting",
+    "away": "Barcelona",
+    "competition": "zz-UEFA Champions League 26/27"
+  },
+  "zz-12624784": {
+    "date": "2026-12-08T20:00:00+00:00",
+    "colorId": "2",
+    "event_id": "4oos5gabrthkjh7enj5bjkncgg",
+    "home": "Roma",
+    "away": "Sporting",
+    "competition": "zz-UEFA Champions League 26/27"
+  },
+  "zz-12624790": {
+    "date": "2026-11-25T20:00:00+00:00",
+    "colorId": "2",
+    "event_id": "piif3adk88curacmgftf3u6730",
+    "home": "Sporting",
+    "away": "Manchester United",
+    "competition": "zz-UEFA Champions League 26/27"
+  },
+  "zz-12624796": {
+    "date": "2026-11-03T17:45:00+00:00",
+    "colorId": "2",
+    "event_id": "s78d0d032cgfq7ubbc6v4fnjbs",
+    "home": "Shakhtar Donetsk",
+    "away": "Sporting",
+    "competition": "zz-UEFA Champions League 26/27"
+  },
+  "zz-12624797": {
+    "date": "2026-10-21T20:00:00+01:00",
+    "colorId": "2",
+    "event_id": "vkscpmrvh9t22nbc2nfvtvksdc",
+    "home": "Sporting",
+    "away": "LASK Linz",
+    "competition": "zz-UEFA Champions League 26/27"
+  },
+  "zz-12624798": {
+    "date": "2026-10-13T17:45:00+01:00",
+    "colorId": "2",
+    "event_id": "vcniba509ivhg811eo663cqki4",
+    "home": "Lens",
+    "away": "Sporting",
+    "competition": "zz-UEFA Champions League 26/27"
+  },
+  "zz-12624795": {
+    "date": "2026-09-09T20:00:00+01:00",
+    "colorId": "2",
+    "event_id": "mnuta85vv9qvepaqljrll3ht8g",
+    "home": "Sporting",
+    "away": "Galatasaray",
+    "competition": "zz-UEFA Champions League 26/27"
   }
 }
