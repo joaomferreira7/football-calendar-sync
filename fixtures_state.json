@@ -1,17 +1,9 @@
 {
   "zz-12278273": {
-    "date": "2026-09-13T00:00:00+01:00",
+    "date": "2026-09-12T14:00:00+01:00",
     "event_id": "e0k428job37qee6uhv3huko678",
     "home": "FC Felgueiras",
     "away": "FC Penafiel",
-    "competition": "zz-Liga Portugal 2 Meu Super 26/27",
-    "colorId": "11"
-  },
-  "zz-12278295": {
-    "date": "2026-09-05T14:00:00+01:00",
-    "event_id": "qh55vjk2eknq3h371iearp169o",
-    "home": "FC Penafiel",
-    "away": "Académica OAF",
     "competition": "zz-Liga Portugal 2 Meu Super 26/27",
     "colorId": "11"
   },
@@ -200,7 +192,7 @@
     "colorId": "11"
   },
   "zz-12278453": {
-    "date": "2026-11-15T00:00:00+00:00",
+    "date": "2026-11-15T15:30:00+00:00",
     "event_id": "fe3f85isd6t06p09g4cj2r5i6k",
     "home": "FC Penafiel",
     "away": "Lusitânia de Lourosa",
@@ -208,7 +200,7 @@
     "colorId": "11"
   },
   "zz-12278377": {
-    "date": "2026-11-08T00:00:00+00:00",
+    "date": "2026-11-07T14:00:00+00:00",
     "event_id": "b32336tfkutcogdvf05ckabecg",
     "home": "GD Chaves",
     "away": "FC Penafiel",
@@ -216,7 +208,7 @@
     "colorId": "11"
   },
   "zz-12278419": {
-    "date": "2026-11-01T00:00:00+00:00",
+    "date": "2026-11-02T18:00:00+00:00",
     "event_id": "531t5k13dv5hsdrq1p3jqhbpfs",
     "home": "FC Penafiel",
     "away": "Feirense",
@@ -224,7 +216,7 @@
     "colorId": "11"
   },
   "zz-12278307": {
-    "date": "2026-10-25T00:00:00+01:00",
+    "date": "2026-10-24T18:00:00+01:00",
     "event_id": "iphga1fhigjefdkjp795cd6mh4",
     "home": "Farense",
     "away": "FC Penafiel",
@@ -232,7 +224,7 @@
     "colorId": "11"
   },
   "zz-12278367": {
-    "date": "2026-10-11T00:00:00+01:00",
+    "date": "2026-10-09T18:00:00+01:00",
     "event_id": "n6s5b27k2rt9u17t1qr15rri50",
     "home": "FC Penafiel",
     "away": "AFS",
@@ -256,7 +248,7 @@
     "colorId": "2"
   },
   "zz-12278354": {
-    "date": "2027-05-02T15:30:00+01:00",
+    "date": "2027-05-02T00:00:00+01:00",
     "event_id": "d62h5uc9eu783d5cbg4hlmpclg",
     "home": "Estoril Praia",
     "away": "Sporting",
@@ -264,7 +256,7 @@
     "colorId": "2"
   },
   "zz-12278164": {
-    "date": "2027-04-25T15:30:00+01:00",
+    "date": "2027-04-25T00:00:00+01:00",
     "event_id": "a2svplcjb1687nh3eaoegpjpp8",
     "home": "Sporting",
     "away": "Gil Vicente",
@@ -272,7 +264,7 @@
     "colorId": "2"
   },
   "zz-12278267": {
-    "date": "2027-04-18T15:30:00+01:00",
+    "date": "2027-04-18T00:00:00+01:00",
     "event_id": "72801cbnsml797s8rlkv6friqs",
     "home": "Marítimo",
     "away": "Sporting",
@@ -288,7 +280,7 @@
     "colorId": "2"
   },
   "zz-12278202": {
-    "date": "2027-04-04T15:30:00+01:00",
+    "date": "2027-04-04T00:00:00+01:00",
     "event_id": "jfdj0sd3l6vlmt1p6kk2iheqp4",
     "home": "Moreirense",
     "away": "Sporting",
@@ -296,7 +288,7 @@
     "colorId": "2"
   },
   "zz-12278068": {
-    "date": "2027-03-21T15:30:00+00:00",
+    "date": "2027-03-21T00:00:00+00:00",
     "event_id": "8314see5bpkr6nh1i1osp6m2jc",
     "home": "Sporting",
     "away": "Casa Pia AC",
@@ -304,7 +296,7 @@
     "colorId": "2"
   },
   "zz-12278118": {
-    "date": "2027-03-14T15:30:00+00:00",
+    "date": "2027-03-14T00:00:00+00:00",
     "event_id": "4t17qfntm9ursffl9tdp3f5tgo",
     "home": "Académico",
     "away": "Sporting",
@@ -320,7 +312,7 @@
     "colorId": "2"
   },
   "zz-12278075": {
-    "date": "2027-02-28T15:30:00+00:00",
+    "date": "2027-02-28T00:00:00+00:00",
     "event_id": "ik5licpqco7s8cc7sdmerttjlk",
     "home": "FC Arouca",
     "away": "Sporting",
@@ -336,7 +328,7 @@
     "colorId": "2"
   },
   "zz-12278029": {
-    "date": "2027-02-14T15:30:00+00:00",
+    "date": "2027-02-14T00:00:00+00:00",
     "event_id": "pumen3s28cb58r558sgja5k2d4",
     "home": "Nacional",
     "away": "Sporting",
@@ -344,7 +336,7 @@
     "colorId": "2"
   },
   "zz-12277992": {
-    "date": "2027-02-07T15:30:00+00:00",
+    "date": "2027-02-07T00:00:00+00:00",
     "event_id": "lkirshiqs9lt7m8r18g9odlgao",
     "home": "Sporting",
     "away": "Rio Ave",
@@ -392,7 +384,7 @@
     "colorId": "2"
   },
   "zz-12278353": {
-    "date": "2026-12-20T15:30:00+00:00",
+    "date": "2026-12-20T00:00:00+00:00",
     "event_id": "uj8k59pt29qgncv94q6faegcso",
     "home": "Sporting",
     "away": "Estoril Praia",
@@ -400,7 +392,7 @@
     "colorId": "2"
   },
   "zz-12278163": {
-    "date": "2026-12-13T15:30:00+00:00",
+    "date": "2026-12-13T00:00:00+00:00",
     "event_id": "on3coa0pjpq3vgnbafvnr5cgbg",
     "home": "Gil Vicente",
     "away": "Sporting",
@@ -408,7 +400,7 @@
     "colorId": "2"
   },
   "zz-12278264": {
-    "date": "2026-12-06T15:30:00+00:00",
+    "date": "2026-12-06T00:00:00+00:00",
     "event_id": "8dsnnf7vlqu9cahke5mfi0hbj4",
     "home": "Sporting",
     "away": "Marítimo",
@@ -416,7 +408,7 @@
     "colorId": "2"
   },
   "zz-12278133": {
-    "date": "2026-11-29T00:00:00+00:00",
+    "date": "2026-11-29T20:30:00+00:00",
     "event_id": "d1v4slcvbnqe5spqhjbvq1bkq0",
     "home": "FC Porto",
     "away": "Sporting",
@@ -424,7 +416,7 @@
     "colorId": "2"
   },
   "zz-12278197": {
-    "date": "2026-11-08T15:30:00+00:00",
+    "date": "2026-11-07T20:30:00+00:00",
     "event_id": "oaglu8367p9p5veje60qvst7bg",
     "home": "Sporting",
     "away": "Moreirense",
@@ -432,7 +424,7 @@
     "colorId": "2"
   },
   "zz-12278066": {
-    "date": "2026-11-01T15:30:00+00:00",
+    "date": "2026-10-30T20:15:00+00:00",
     "event_id": "d2ucb4e07or0tg2p04dkh9ck54",
     "home": "Casa Pia AC",
     "away": "Sporting",
@@ -440,7 +432,7 @@
     "colorId": "2"
   },
   "zz-12278117": {
-    "date": "2026-10-25T15:30:00+00:00",
+    "date": "2026-10-25T20:30:00+00:00",
     "event_id": "un3k87rrdkv4628fugiu4jj5ro",
     "home": "Sporting",
     "away": "Académico",
@@ -448,7 +440,7 @@
     "colorId": "2"
   },
   "zz-12278035": {
-    "date": "2026-10-11T15:30:00+01:00",
+    "date": "2026-10-09T20:15:00+01:00",
     "event_id": "p0go3r41lo6objunoakdu7tft0",
     "home": "SC Braga",
     "away": "Sporting",
@@ -456,7 +448,7 @@
     "colorId": "2"
   },
   "zz-12278073": {
-    "date": "2026-09-20T15:30:00+01:00",
+    "date": "2026-09-19T20:30:00+01:00",
     "event_id": "88jg3127a3t7o97rotfaq1ib84",
     "home": "Sporting",
     "away": "FC Arouca",
@@ -464,18 +456,10 @@
     "colorId": "2"
   },
   "zz-12278003": {
-    "date": "2026-09-13T00:00:00+01:00",
+    "date": "2026-09-13T20:30:00+01:00",
     "event_id": "mleb1rkbm6cp3k0t8hqdt1jaig",
     "home": "FC Famalicão",
     "away": "Sporting",
-    "competition": "zz-Liga Portugal Betclic 26/27",
-    "colorId": "2"
-  },
-  "zz-12278027": {
-    "date": "2026-09-05T20:30:00+01:00",
-    "event_id": "sulamg9rfig048nfh6odvr7dq8",
-    "home": "Sporting",
-    "away": "Nacional",
     "competition": "zz-Liga Portugal Betclic 26/27",
     "colorId": "2"
   },
@@ -550,5 +534,13 @@
     "home": "Sporting",
     "away": "Galatasaray",
     "competition": "zz-UEFA Champions League 26/27"
+  },
+  "zz-12209940": {
+    "date": "2026-10-27T20:15:00+00:00",
+    "colorId": "2",
+    "event_id": "tosrvcp2rp34t8cdneugceg3ik",
+    "home": "Sporting",
+    "away": "Marítimo",
+    "competition": "zz-Allianz Cup 26/27"
   }
 }
