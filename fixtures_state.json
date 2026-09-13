@@ -1,12 +1,4 @@
 {
-  "zz-12278273": {
-    "date": "2026-09-12T14:00:00+01:00",
-    "event_id": "e0k428job37qee6uhv3huko678",
-    "home": "FC Felgueiras",
-    "away": "FC Penafiel",
-    "competition": "zz-Liga Portugal 2 Meu Super 26/27",
-    "colorId": "11"
-  },
   "zz-12278522": {
     "date": "2027-05-16T00:00:00+01:00",
     "event_id": "ifo8avpj26nh72t3e6t914oceo",
@@ -304,7 +296,7 @@
     "colorId": "2"
   },
   "zz-12278036": {
-    "date": "2027-03-07T15:30:00+00:00",
+    "date": "2027-03-07T00:00:00+00:00",
     "event_id": "h1ppfvfrckhbfao7fd138ubf08",
     "home": "Sporting",
     "away": "SC Braga",
@@ -464,7 +456,7 @@
     "colorId": "2"
   },
   "zz-12384690": {
-    "date": "2026-09-20T15:00:00+01:00",
+    "date": "2026-09-19T17:00:00+01:00",
     "colorId": "11",
     "event_id": "o89oauic4eh608td5gh2k7lsu4",
     "home": "UD Oliveirense/SC Penalva do Castelo",
@@ -525,14 +517,6 @@
     "event_id": "vcniba509ivhg811eo663cqki4",
     "home": "Lens",
     "away": "Sporting",
-    "competition": "zz-UEFA Champions League 26/27"
-  },
-  "zz-12624795": {
-    "date": "2026-09-09T20:00:00+01:00",
-    "colorId": "2",
-    "event_id": "mnuta85vv9qvepaqljrll3ht8g",
-    "home": "Sporting",
-    "away": "Galatasaray",
     "competition": "zz-UEFA Champions League 26/27"
   },
   "zz-12209940": {
