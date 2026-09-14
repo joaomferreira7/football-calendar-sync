@@ -176,7 +176,7 @@
     "colorId": "11"
   },
   "zz-12278412": {
-    "date": "2026-11-29T00:00:00+00:00",
+    "date": "2026-11-29T15:30:00+00:00",
     "event_id": "j99r01legfchsr4legbbs05dts",
     "home": "FC Penafiel",
     "away": "Benfica",
@@ -444,14 +444,6 @@
     "event_id": "88jg3127a3t7o97rotfaq1ib84",
     "home": "Sporting",
     "away": "FC Arouca",
-    "competition": "zz-Liga Portugal Betclic 26/27",
-    "colorId": "2"
-  },
-  "zz-12278003": {
-    "date": "2026-09-13T20:30:00+01:00",
-    "event_id": "mleb1rkbm6cp3k0t8hqdt1jaig",
-    "home": "FC Famalicão",
-    "away": "Sporting",
     "competition": "zz-Liga Portugal Betclic 26/27",
     "colorId": "2"
   },
