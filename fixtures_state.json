@@ -392,7 +392,7 @@
     "colorId": "2"
   },
   "zz-12278264": {
-    "date": "2026-12-06T00:00:00+00:00",
+    "date": "2026-12-04T20:15:00+00:00",
     "event_id": "8dsnnf7vlqu9cahke5mfi0hbj4",
     "home": "Sporting",
     "away": "Marítimo",
@@ -502,5 +502,13 @@
     "home": "Sporting",
     "away": "Marítimo",
     "competition": "zz-Allianz Cup 26/27"
+  },
+  "zz-12711704": {
+    "date": "2026-10-18T15:00:00+01:00",
+    "colorId": "11",
+    "event_id": "ddu7oeqamsgm52ocnrio4ns698",
+    "home": "FC Penafiel",
+    "away": "Leça FC",
+    "competition": "zz-Taça de Portugal 26/27"
   }
 }
