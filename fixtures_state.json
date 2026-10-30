@@ -399,14 +399,6 @@
     "competition": "zz-Liga Portugal Betclic 26/27",
     "colorId": "2"
   },
-  "zz-12278066": {
-    "date": "2026-10-30T20:15:00+00:00",
-    "event_id": "d2ucb4e07or0tg2p04dkh9ck54",
-    "home": "Casa Pia AC",
-    "away": "Sporting",
-    "competition": "zz-Liga Portugal Betclic 26/27",
-    "colorId": "2"
-  },
   "zz-12624704": {
     "date": "2027-01-27T20:00:00+00:00",
     "colorId": "2",
@@ -448,11 +440,19 @@
     "competition": "zz-UEFA Champions League 26/27"
   },
   "zz-12799247": {
-    "date": "2026-11-22T15:00:00+00:00",
+    "date": "2026-11-21T18:00:00+00:00",
     "colorId": "2",
     "event_id": "er55n5jt399vqll1gv4guncnqc",
     "home": "Sporting",
     "away": "União da Serra",
     "competition": "zz-Taça de Portugal 26/27"
+  },
+  "zz-12209944": {
+    "date": "2027-01-06T20:15:00+00:00",
+    "colorId": "2",
+    "event_id": "u84eemp5denngh1gg6tarkjpgo",
+    "home": "Sporting",
+    "away": "FC Famalicão",
+    "competition": "zz-Allianz Cup 26/27"
   }
 }
