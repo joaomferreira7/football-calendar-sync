@@ -199,14 +199,6 @@
     "competition": "zz-Liga Portugal 2 Meu Super 26/27",
     "colorId": "11"
   },
-  "zz-12278419": {
-    "date": "2026-11-02T18:00:00+00:00",
-    "event_id": "531t5k13dv5hsdrq1p3jqhbpfs",
-    "home": "FC Penafiel",
-    "away": "Feirense",
-    "competition": "zz-Liga Portugal 2 Meu Super 26/27",
-    "colorId": "11"
-  },
   "zz-12278336": {
     "date": "2027-05-16T00:00:00+01:00",
     "event_id": "8s6h7fjq98muddp01b2pbvtkb0",
@@ -368,7 +360,7 @@
     "colorId": "2"
   },
   "zz-12278163": {
-    "date": "2026-12-13T00:00:00+00:00",
+    "date": "2026-12-12T20:30:00+00:00",
     "event_id": "on3coa0pjpq3vgnbafvnr5cgbg",
     "home": "Gil Vicente",
     "away": "Sporting",
@@ -376,7 +368,7 @@
     "colorId": "2"
   },
   "zz-12278264": {
-    "date": "2026-12-06T00:00:00+00:00",
+    "date": "2026-12-04T20:15:00+00:00",
     "event_id": "8dsnnf7vlqu9cahke5mfi0hbj4",
     "home": "Sporting",
     "away": "Marítimo",
