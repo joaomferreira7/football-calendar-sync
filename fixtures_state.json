@@ -160,7 +160,7 @@
     "colorId": "11"
   },
   "zz-12278441": {
-    "date": "2026-12-13T00:00:00+00:00",
+    "date": "2026-12-12T14:00:00+00:00",
     "event_id": "23a3tflbuco29tqanfbktlflc0",
     "home": "FC Penafiel",
     "away": "Leixões",
@@ -168,7 +168,7 @@
     "colorId": "11"
   },
   "zz-12278493": {
-    "date": "2026-12-06T00:00:00+00:00",
+    "date": "2026-12-05T11:00:00+00:00",
     "event_id": "tbvt73v49rpl0poe0bknfs9u14",
     "home": "CD Tondela",
     "away": "FC Penafiel",
@@ -421,14 +421,6 @@
     "event_id": "piif3adk88curacmgftf3u6730",
     "home": "Sporting",
     "away": "Manchester United",
-    "competition": "zz-UEFA Champions League 26/27"
-  },
-  "zz-12624796": {
-    "date": "2026-11-03T17:45:00+00:00",
-    "colorId": "2",
-    "event_id": "s78d0d032cgfq7ubbc6v4fnjbs",
-    "home": "Shakhtar Donetsk",
-    "away": "Sporting",
     "competition": "zz-UEFA Champions League 26/27"
   },
   "zz-12799247": {
