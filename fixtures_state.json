@@ -191,14 +191,6 @@
     "competition": "zz-Liga Portugal 2 Meu Super 26/27",
     "colorId": "11"
   },
-  "zz-12278377": {
-    "date": "2026-11-07T14:00:00+00:00",
-    "event_id": "b32336tfkutcogdvf05ckabecg",
-    "home": "GD Chaves",
-    "away": "FC Penafiel",
-    "competition": "zz-Liga Portugal 2 Meu Super 26/27",
-    "colorId": "11"
-  },
   "zz-12278336": {
     "date": "2027-05-16T00:00:00+01:00",
     "event_id": "8s6h7fjq98muddp01b2pbvtkb0",
@@ -380,14 +372,6 @@
     "event_id": "d1v4slcvbnqe5spqhjbvq1bkq0",
     "home": "FC Porto",
     "away": "Sporting",
-    "competition": "zz-Liga Portugal Betclic 26/27",
-    "colorId": "2"
-  },
-  "zz-12278197": {
-    "date": "2026-11-07T20:30:00+00:00",
-    "event_id": "oaglu8367p9p5veje60qvst7bg",
-    "home": "Sporting",
-    "away": "Moreirense",
     "competition": "zz-Liga Portugal Betclic 26/27",
     "colorId": "2"
   },
