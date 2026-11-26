@@ -312,7 +312,7 @@
     "colorId": "2"
   },
   "zz-12277924": {
-    "date": "2027-01-17T00:00:00+00:00",
+    "date": "2027-01-16T20:30:00+00:00",
     "event_id": "gu0l1qofk85hbgnmpkb150qf1s",
     "home": "Sporting",
     "away": "Est. Amadora",
@@ -320,7 +320,7 @@
     "colorId": "2"
   },
   "zz-12278335": {
-    "date": "2027-01-10T00:00:00+00:00",
+    "date": "2027-01-02T20:30:00+00:00",
     "event_id": "ir485479rbsihkjo2qaikscd1s",
     "home": "Sporting",
     "away": "Santa Clara",
@@ -328,7 +328,7 @@
     "colorId": "2"
   },
   "zz-12278243": {
-    "date": "2026-12-27T00:00:00+00:00",
+    "date": "2026-12-29T20:45:00+00:00",
     "event_id": "c3c78meco7v333ddeklfh93sek",
     "home": "Benfica",
     "away": "Sporting",
@@ -336,7 +336,7 @@
     "colorId": "2"
   },
   "zz-12278353": {
-    "date": "2026-12-20T00:00:00+00:00",
+    "date": "2026-12-22T20:45:00+00:00",
     "event_id": "uj8k59pt29qgncv94q6faegcso",
     "home": "Sporting",
     "away": "Estoril Praia",
@@ -391,14 +391,6 @@
     "away": "Sporting",
     "competition": "zz-UEFA Champions League 26/27"
   },
-  "zz-12624790": {
-    "date": "2026-11-25T20:00:00+00:00",
-    "colorId": "2",
-    "event_id": "piif3adk88curacmgftf3u6730",
-    "home": "Sporting",
-    "away": "Manchester United",
-    "competition": "zz-UEFA Champions League 26/27"
-  },
   "zz-12209944": {
     "date": "2027-01-06T20:15:00+00:00",
     "colorId": "2",
@@ -408,7 +400,7 @@
     "competition": "zz-Allianz Cup 26/27"
   },
   "zz-12799308": {
-    "date": "2026-12-16T15:00:00+00:00",
+    "date": "2026-12-16T20:45:00+00:00",
     "colorId": "2",
     "event_id": "66gaclp2v70jn92492omb3g2m0",
     "home": "Sporting",
